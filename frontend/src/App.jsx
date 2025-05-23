@@ -1,35 +1,88 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import Register from './components/Register';
+import Login from './components/Login'; // Placeholder Login component
+import './App.css'; // Keep existing styles
 
-function App() {
-  const [count, setCount] = useState(0)
-
+// Placeholder Home component
+function Home() {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
+    <div style={{ textAlign: 'center', marginTop: '20px' }}>
+      <h1>Welcome to the App</h1>
+      <p>This is the home page.</p>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
         <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
+          Edit <code>src/App.jsx</code> and save to test HMR (This is example content)
         </p>
       </div>
       <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
+        Click on the Vite and React logos to learn more (This is example content)
       </p>
-    </>
-  )
+    </div>
+  );
 }
 
-export default App
+
+function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Placeholder auth state
+
+  // Placeholder logout function
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    // In a real app, also clear token from localStorage, etc.
+    // navigate('/'); // Optional: redirect to home or login
+  };
+
+  const navStyle = {
+    display: 'flex',
+    justifyContent: 'space-around',
+    padding: '1rem',
+    backgroundColor: '#f0f0f0',
+    borderBottom: '1px solid #ccc',
+  };
+
+  const linkStyle = {
+    textDecoration: 'none',
+    color: '#007bff',
+    margin: '0 10px',
+  };
+
+  const buttonStyle = {
+    background: 'none',
+    border: 'none',
+    color: '#007bff',
+    cursor: 'pointer',
+    padding: '0',
+    fontFamily: 'inherit',
+    fontSize: 'inherit',
+    margin: '0 10px',
+  };
+
+  return (
+    <BrowserRouter>
+      <nav style={navStyle}>
+        <Link to="/" style={linkStyle}>Home</Link>
+        {isLoggedIn ? (
+          <>
+            {/* <p>Welcome, User!</p> */}
+            <button onClick={handleLogout} style={buttonStyle}>Logout</button>
+          </>
+        ) : (
+          <>
+            <Link to="/login" style={linkStyle}>Login</Link>
+            <Link to="/register" style={linkStyle}>Create Account</Link>
+          </>
+        )}
+      </nav>
+
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+        {/* Add other routes here */}
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+export default App;
