@@ -1,6 +1,6 @@
-import User from "../models/User";
+import User from "../models/User.js";
 import validator from "validator";
-import Handler from "../utils/handlerTemplate";
+import Handler from "../utils/handlerTemplate.js";
 
 class requiredFieldsHandler extends Handler {
   async handle(context, res) {

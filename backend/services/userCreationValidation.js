@@ -5,9 +5,9 @@ import {
   passwordLengthHandler,
   strongPasswordHandler,
   existingUserHandler,
-} from "../handlers/userCreationHandler";
+} from "../handlers/userCreationHandler.js";
 
-export const userCreationChain = () => {
+const userCreationChain = () => {
   const requiredFields = new requiredFieldsHandler();
   const fullNameLength = new fullNameHandler();
   const emailFormat = new validEmailHandler();
@@ -25,3 +25,5 @@ export const userCreationChain = () => {
 
   return requiredFields;
 };
+
+export default userCreationChain;

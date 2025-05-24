@@ -1,54 +1,15 @@
-import User from "../models/User";
+import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import validator from "validator";
+import userCreationChain from "../services/userCreationValidation.js";
 
 const registerUser = async (req, res) => {
   try {
     const { fullName, email, password } = req.body;
+    const userCreation = userCreationChain(); // inicializar cadena
 
-    // Validar que todos los campos estén presentes
-    if (!fullName || !email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Todos los campos son obligatorios" });
-    }
-
-    // Validar que el nombre tenga al menos 2 caracteres
-    if (fullName.trim().length < 2) {
-      return res
-        .status(400)
-        .json({ message: "El nombre debe tener al menos 2 caracteres" });
-    }
-
-    // Validar formato del email
-    if (!validator.isEmail(email)) {
-      return res
-        .status(400)
-        .json({ message: "El formato del correo electrónico no es válido" });
-    }
-
-    // Validar longitud mínima de la contraseña
-    if (password.length < 6) {
-      return res
-        .status(400)
-        .json({ message: "La contraseña debe tener al menos 6 caracteres" });
-    }
-
-    // Validar que la contraseña sea fuerte (mayúscula, minúscula y número)
-    const passwordRegex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
-    if (!passwordRegex.test(password)) {
-      return res.status(400).json({
-        message:
-          "La contraseña debe contener al menos una mayúscula, una minúscula y un número",
-      });
-    }
-
-    // Verificar si el usuario ya existe
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: "El correo ya está registrado" });
-    }
+    await userCreation.handle(req.body, res); // aplicar la cadena
 
     // Hashear la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -120,7 +81,4 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = {
-  registerUser,
-  loginUser,
-};
+export { registerUser, loginUser };
