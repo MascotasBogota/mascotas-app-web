@@ -1,31 +1,52 @@
-import mongoose from "mongoose";
-import express from "express";
-import dotenv from "dotenv";
-import userRoutes from "./routes/userRoutes.js";
-import cors from "cors";
+import express from 'express'
+import cors from 'cors'
+import dotenv from 'dotenv'
+import connectDB from './config/db.js'
+import userRoutes from './routes/userRoutes.js'
 
-dotenv.config();
-const app = express();
+// Cargar variables de entorno
+dotenv.config()
 
-app.use(cors());
-app.use(express.json());
+const app = express()
 
-// Ensure MONGO_URI is loaded before attempting to connect
-if (!process.env.MONGO_URI) {
-  console.error("🔴 MONGO_URI no está definido en .env");
-  process.exit(1); // Salir si MONGO_URI no está definido
-}
+// Conectar a la base de datos
+connectDB()
 
-app.use("/api/users", userRoutes); // Ruta para registrar usuarios
+// Middleware CORS
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  credentials: true
+}))
 
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("🟢 MongoDB conectado"); // Changed console log for clarity
-    app.listen(process.env.PORT || 5000, () => {
-      console.log(
-        `Servidor corriendo en el puerto ${process.env.PORT || 5000}`
-      );
-    });
+// Middleware para parsear JSON
+app.use(express.json())
+
+// Ruta de prueba
+app.get('/', (req, res) => {
+  res.json({ message: 'Mascotas App API is running 🐾' })
+})
+
+// Ruta de prueba para /api
+app.get('/api', (req, res) => {
+  res.json({ message: 'API endpoint working ✅' })
+})
+
+// Rutas principales
+app.use('/api/users', userRoutes)
+
+// Middleware para rutas no encontradas
+app.use('*', (req, res) => {
+  res.status(404).json({ 
+    message: `Route ${req.originalUrl} not found` 
   })
-  .catch((err) => console.error("Error al conectar a MongoDB", err));
+})
+
+// Puerto
+const PORT = process.env.PORT || 5000
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`)
+  console.log(`📡 API available at: http://localhost:${PORT}/api`)
+})
+
+export default app

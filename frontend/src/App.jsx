@@ -1,88 +1,73 @@
-import { useState } from 'react';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-import Register from './components/Register';
-import Login from './components/Login'; // Placeholder Login component
-import './App.css'; // Keep existing styles
-
-// Placeholder Home component
-function Home() {
-  return (
-    <div style={{ textAlign: 'center', marginTop: '20px' }}>
-      <h1>Welcome to the App</h1>
-      <p>This is the home page.</p>
-      <div className="card">
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR (This is example content)
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more (This is example content)
-      </p>
-    </div>
-  );
-}
-
+import { useState } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import Login from './pages/Login'
+import Register from './pages/Register'
+import Dashboard from './pages/Dashboard'
+import Navbar from './components/Navbar'
+import './App.css'
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Placeholder auth state
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('token') !== null
+  })
 
-  // Placeholder logout function
+  const handleLogin = (token, user) => {
+    localStorage.setItem('token', token)
+    localStorage.setItem('user', JSON.stringify(user))
+    setIsAuthenticated(true)
+  }
+
   const handleLogout = () => {
-    setIsLoggedIn(false);
-    // In a real app, also clear token from localStorage, etc.
-    // navigate('/'); // Optional: redirect to home or login
-  };
-
-  const navStyle = {
-    display: 'flex',
-    justifyContent: 'space-around',
-    padding: '1rem',
-    backgroundColor: '#f0f0f0',
-    borderBottom: '1px solid #ccc',
-  };
-
-  const linkStyle = {
-    textDecoration: 'none',
-    color: '#007bff',
-    margin: '0 10px',
-  };
-
-  const buttonStyle = {
-    background: 'none',
-    border: 'none',
-    color: '#007bff',
-    cursor: 'pointer',
-    padding: '0',
-    fontFamily: 'inherit',
-    fontSize: 'inherit',
-    margin: '0 10px',
-  };
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    setIsAuthenticated(false)
+  }
 
   return (
     <BrowserRouter>
-      <nav style={navStyle}>
-        <Link to="/" style={linkStyle}>Home</Link>
-        {isLoggedIn ? (
-          <>
-            {/* <p>Welcome, User!</p> */}
-            <button onClick={handleLogout} style={buttonStyle}>Logout</button>
-          </>
-        ) : (
-          <>
-            <Link to="/login" style={linkStyle}>Login</Link>
-            <Link to="/register" style={linkStyle}>Create Account</Link>
-          </>
-        )}
-      </nav>
+      <div className="App">
+        {isAuthenticated && <Navbar onLogout={handleLogout} />}
+        
+        <Routes>
+          {/* Rutas públicas */}
+          <Route 
+            path="/login" 
+            element={
+              !isAuthenticated ? 
+              <Login onLogin={handleLogin} /> : 
+              <Navigate to="/dashboard" replace />
+            } 
+          />
+          <Route 
+            path="/register" 
+            element={
+              !isAuthenticated ? 
+              <Register /> : 
+              <Navigate to="/dashboard" replace />
+            } 
+          />
 
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        {/* Add other routes here */}
-      </Routes>
+          {/* Rutas protegidas */}
+          <Route 
+            path="/dashboard" 
+            element={
+              isAuthenticated ? 
+              <Dashboard /> : 
+              <Navigate to="/login" replace />
+            } 
+          />
+
+          {/* Ruta por defecto */}
+          <Route 
+            path="/" 
+            element={
+              <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />
+            } 
+          />
+        </Routes>
+      </div>
     </BrowserRouter>
-  );
+  )
 }
 
-export default App;
+export default App
