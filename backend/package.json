@@ -4,12 +4,14 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "test": "vitest",
+    "test": "vitest run",
     "test:watch": "vitest --watch",
-    "test:coverage": "vitest run --coverage",
+    "test:coverage": "vitest run --coverage --reporter=verbose",
+    "test:ci": "vitest run --reporter=verbose --coverage.enabled --coverage.reporter=text --coverage.reporter=lcov",
     "start": "npx nodemon server.js",
     "dev": "npx nodemon server.js",
-    "serve": "node server.js"
+    "serve": "node server.js",
+    "lint": "echo 'No linter configured' && exit 0"
   },
   "keywords": [],
   "author": "",
