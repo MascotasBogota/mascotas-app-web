@@ -7,7 +7,9 @@
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest run --coverage",
-    "start": "nodemon server.js"
+    "start": "npx nodemon server.js",
+    "dev": "npx nodemon server.js",
+    "serve": "node server.js"
   },
   "keywords": [],
   "author": "",
@@ -24,6 +26,7 @@
     "validator": "^13.15.0"
   },
   "devDependencies": {
+    "nodemon": "^3.1.10",
     "supertest": "^7.1.1",
     "vitest": "^3.1.4"
   }
