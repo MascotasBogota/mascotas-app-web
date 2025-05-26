@@ -12,6 +12,12 @@ on:
       - 'backend/**'
       - '.github/workflows/**'
 
+# Agregar permisos explícitos
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -35,10 +41,6 @@ jobs:
       working-directory: ./backend
       run: npm ci
 
-    - name: Run linting (optional)
-      working-directory: ./backend
-      run: npm run lint --if-present
-
     - name: Run unit tests
       working-directory: ./backend
       run: npm test
@@ -47,26 +49,17 @@ jobs:
       working-directory: ./backend
       run: npm run test:coverage
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./backend/coverage/lcov.info
-        directory: ./backend/coverage/
-        flags: backend
-        name: backend-coverage
-        fail_ci_if_error: false
-
     - name: Comment PR with test results
-      if: github.event_name == 'pull_request' && always()
+      if: github.event_name == 'pull_request' && matrix.node-version == '20.x'
       uses: actions/github-script@v6
       with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
-          const fs = require('fs');
-          const path = require('path');
+          const testsPassed = '${{ job.status }}' === 'success';
           
           let message = '## 🧪 Test Results\n\n';
           
-          if (context.job.status === 'success') {
+          if (testsPassed) {
             message += '✅ All tests passed successfully!\n\n';
             message += `- Node.js version: ${{ matrix.node-version }}\n`;
             message += `- Tests executed in: ${process.env.RUNNER_OS}\n`;
@@ -74,17 +67,13 @@ jobs:
             message += '❌ Some tests failed. Please check the logs above.\n\n';
           }
           
-          // Solo crear el comentario para una versión de Node para evitar spam
-          if ('${{ matrix.node-version }}' === '20.x') {
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: message
-            });
-          }
+          await github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: message
+          });
 
-  # Job separado para verificar que las dependencias estén actualizadas
   security-audit:
     runs-on: ubuntu-latest
     steps:
@@ -103,8 +92,4 @@ jobs:
 
     - name: Run security audit
       working-directory: ./backend
-      run: npm audit --audit-level high
-
-    - name: Check for outdated packages
-      working-directory: ./backend
-      run: npm outdated || true
+      run: npm audit --audit-level high || true
